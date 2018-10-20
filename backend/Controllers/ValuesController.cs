@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
+
 
 namespace backend.Controllers
 {
@@ -10,10 +12,16 @@ namespace backend.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+
+        //redis stuff
+        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("redis-master");
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
+            var db = redis.GetDatabase();
+            db.StringSet("blubb", "test");
+
             var enumerator = Environment.GetEnvironmentVariables().GetEnumerator();
             var ret = new List<string>();
             while (enumerator.MoveNext())
@@ -27,7 +35,9 @@ namespace backend.Controllers
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
-            return "value";
+            var db = redis.GetDatabase();
+            var ret = db.StringGet("blubb");
+            return ret.ToString();
         }
 
         // POST api/values
